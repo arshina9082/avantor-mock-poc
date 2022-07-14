@@ -22,30 +22,12 @@ jobs:
       
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      # As you can see below we are using matrix.node-version => it means it will execute for all possible combinations
-      # provided matrix keys array(in our case only one kye => node-version)
-      - uses: actions/checkout@v2
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1.4.3
-        with:
-          node-version: ${{ matrix.node-version }}
-      # Install the node modules
-      - name: NPM Install
-        run: npm install
-      # Create production build
-      - name: Production Build
-        run: npm run build -- --prod # This is equivalent to 'ng build --prod'
-        
+
       # Deploy to S3
       # This is a third party action used to sync our production build app with the AWS S3 bucket
       # For security purpose I am using secrets configured in project repo setting.
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@v0.5.1
-        with:
-          # --acl public read => makes files publicly readable(i.e. makes sure that your bucket settings are also set to public)
-          # --delete => permanently deletes files in S3 bucket that are not present in latest build
-          args: --acl public-read --delete
         env:
           AWS_S3_BUCKET: ${{ secrets.AWS_PRODUCTION_BUCKET_NAME }} # S3 bucket name
           # note: use IAM role with limited role for below access-key-id and secret-access-key
