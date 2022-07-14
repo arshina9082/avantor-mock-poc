@@ -1,14 +1,17 @@
-name: GitHub Pages
+name: Upload Website
 
 on:
   push:
     branches:
-    - main
+    - master
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -16,23 +19,5 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ap-south-1
 
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: 14
-
-    - name: Install dependencies
-      run: npm install
-
-    - name: Run tests
-      run: npm run test:headless
-
-    - name: Build
-      run: npm run build:prod
-
-    - name: Deploy
-      if: success()
+    - name: Deploy static site to S3 bucket
       run: aws s3 sync ./dist/avantor-poc s3://avantor-ui-poc
